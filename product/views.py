@@ -1,8 +1,6 @@
-from django.shortcuts import render
 from django.db.models import Q
-from rest_framework import generics, mixins
+from rest_framework import generics, mixins, permissions
 from .models import Product, Category
-from .permissions import IsOwnerOrReadOnly
 from .serializers import ProductSerializer, CategorySerializer
 
 

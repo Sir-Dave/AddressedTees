@@ -1,5 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
 
 
 class MyAccountManager(BaseUserManager):
@@ -33,11 +37,14 @@ class MyAccountManager(BaseUserManager):
         return user
 
 
-class User(AbstractBaseUser):
+class Account(AbstractBaseUser):
     email = models.EmailField(verbose_name="email", max_length=60, unique=True)
     first_name = models.CharField(max_length=30, default="")
     last_name = models.CharField(max_length=30, default="")
+    date_joined = models.DateTimeField(verbose_name='date joined', auto_now_add=True)
+    last_login = models.DateTimeField(verbose_name='last login', auto_now=True)
     is_admin = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
 
@@ -56,3 +63,9 @@ class User(AbstractBaseUser):
     # Does this user have permission to view this app? (ALWAYS YES FOR SIMPLICITY)
     def has_module_perms(self, app_label):
         return True
+
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)
