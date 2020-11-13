@@ -21,4 +21,5 @@ urlpatterns = [
     path('accounts/', include(("user.urls", "api"), namespace="account_api", )),
     path('products/', include(("product.urls", "api"), namespace="product_api", )),
     path('rest-auth/', include('rest_auth.urls')),
+    path('', include('django.contrib.auth.urls')),
 ]

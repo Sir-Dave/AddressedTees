@@ -1,5 +1,5 @@
 from django.db import models
-
+from PIL import Image
 
 class Category(models.Model):
     title = models.CharField(max_length=20)
@@ -9,6 +9,13 @@ class Category(models.Model):
 
 
 class Product(models.Model):
+
+    def upload_location(self, filename):
+        file_path = "images/{category}/{filename}".format(category=str(self.category),
+                                                          filename=filename)
+
+        return file_path
+
     SIZES = (
         ("S", "Small"),
         ("M", "Medium"),
@@ -19,12 +26,20 @@ class Product(models.Model):
 
     name = models.CharField(max_length=20)
     size = models.CharField(max_length=3, choices=SIZES)
-    image = models.ImageField()
+    image = models.ImageField(upload_to=upload_location)
     price = models.IntegerField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
 
     def __str__(self):
         return str(self.name)
+
+    def save(self):
+        super().save()
+        image = Image.open(self.image.path)
+        if image.width > 300 or image.height > 300:
+            output_size = (300,300)
+            image.thumbnail(output_size)
+            image.save(self.image.path)
 
 
 class Order(models.Model):
